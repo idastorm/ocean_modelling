@@ -94,8 +94,8 @@ if __name__ == '__main__':
     all_dates_wind_x = np.repeat(np.flip(u[:, lat_mask][:, :, lon_mask], axis=2), factor, axis=0)
     all_dates_wind_y = np.repeat(np.flip(v[:, lat_mask][:, :, lon_mask], axis=2), factor, axis=0)
 
-    all_dates_current_x = all_dates_wind_x  # Should obviously be changed
-    all_dates_current_y = all_dates_wind_y
+    all_dates_current_x = 2*all_dates_wind_x  # Should obviously be changed
+    all_dates_current_y = 2*all_dates_wind_y
 
     # Extract relevant area of the longitude and latitudes
     lon = longitude[lon_mask]
@@ -137,4 +137,4 @@ if __name__ == '__main__':
 
         date += time_delta
     
-    save_to_GeoJSON(all_results, "files/results.json")
+    save_to_GeoJSON(all_results, "GeoJSON/results.json")

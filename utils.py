@@ -2,6 +2,7 @@ from scipy.io import loadmat, savemat
 import datetime
 import numpy as np
 import json
+from geopy import distance
 
 class Vessel:
 
@@ -51,7 +52,7 @@ def dist2vessels(PX, PY, lon_0, lat_0, start_date='1979-01-01', limit_date='1980
     return results
 
 
-def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon, lat, currents, winds):
+def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, currents, winds):
 
     current_in_x = currents[0]
     current_in_y = currents[1]
@@ -63,13 +64,17 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon, lat, currents, w
     # x = vessel[0][0]
     # y = vessel[0][1]
 
+    longitude = y
+    latitude  = x
+
     for t in np.arange(timesteps):
         
         #longitude, latitude = relative_to_lon_lat(x, y, lon[0], lat[0])
+
         # longitude = x
         # latitude  = y
-        longitude = y
-        latitude  = x
+        # longitude = y
+        # latitude  = x
 
         # v_x_current = current_in_x((day+t, longitude, latitude))
         # v_y_current = current_in_y((day+t, longitude, latitude))
@@ -91,20 +96,38 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon, lat, currents, w
 
         # Get displacement due to drift
         dx, dy = USCG_drift(np.array([v_x_wind, v_y_wind]),
-                                    np.array([v_x_current, v_y_current]), 
-                                    dt, 
-                                    vessel.craft
-                                    )
+                            np.array([v_x_current, v_y_current]), 
+                            dt, 
+                            vessel.craft
+                            )
+
         # Get new position
-        x += dx #+ noise_x
-        y += dy #+ noise_y
+        # y, x = distance.distance((lon_0, lat_0), (latitude, longitude)).km
+        longitude, latitude = lon_lat_from_displacement(dx, dy, longitude, latitude)
+        # x += dx #+ noise_x
+        # y += dy #+ noise_y
 
         # Update the vessel position and save
-        vessel.update_position(x, y)
+        vessel.update_position(longitude, latitude)
         # vessel.append([x, y])
 
     return vessel
 
+def lon_lat_from_displacement(dx, dy, longitude, latitude):
+
+    r_earth = 6371 # km
+
+    new_latitude  = latitude  + (dy / r_earth) * (180 / np.pi);
+    new_longitude = longitude + (dx / r_earth) * (180 / np.pi) / np.cos(latitude * np.pi/180);
+
+    #print(new_longitude, new_latitude)
+
+    return new_longitude, new_latitude
+
+
+def bearing_from_displacement(x, v):
+
+    return np.arccos(np.dot(np.cross(x, v), np.cross(x, v)) / (np.linalg.norm(np.cross()) * np.linalg.norm(dy)))
 
 def relative_to_lon_lat(X, Y, lon_0, lat_0):
 
