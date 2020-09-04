@@ -9,21 +9,6 @@ import multiprocessing as mp
 if __name__ == '__main__':
 
 
-    class Vessel:
-
-        def __init__(self, x, y, craft: int):
-
-            self.craft = craft
-            self.x = x
-            self.y = y
-            self.trajectory = [[self.x, self.y]]
-
-        def update_position(self, x, y):
-            
-            self.x = x
-            self.y = y
-
-            self.trajectory.append([x, y])
 
     # departure_points = loadmat('Dep_dist')['Dep_dist']
 

@@ -64,8 +64,8 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
     # x = vessel[0][0]
     # y = vessel[0][1]
 
-    longitude = y
-    latitude  = x
+    longitude = x
+    latitude  = y
 
     for t in np.arange(timesteps):
         
@@ -79,8 +79,8 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
         # v_x_current = current_in_x((day+t, longitude, latitude))
         # v_y_current = current_in_y((day+t, longitude, latitude))
     
-        v_x_current = current_in_x((longitude, latitude))
-        v_y_current = current_in_y((longitude, latitude))
+        v_x_current = current_in_x((latitude, longitude))
+        v_y_current = current_in_y((latitude, longitude))
 
         # Test if we have reached land
         if np.isnan(v_x_current) or np.isnan(v_y_current):
@@ -90,10 +90,11 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
         # v_x_wind = wind_in_x((day+t, longitude, latitude))
         # v_y_wind = wind_in_y((day+t, longitude, latitude))                
 
-        v_x_wind = wind_in_x((longitude, latitude))
-        v_y_wind = wind_in_y((longitude, latitude))  
-
-
+        v_x_wind = wind_in_x((latitude, longitude))
+        v_y_wind = wind_in_y((latitude, longitude))  
+        
+        # print(v_x_current, v_y_current)
+        # print(v_x_wind, v_y_wind)
         # Get displacement due to drift
         dx, dy = USCG_drift(np.array([v_x_wind, v_y_wind]),
                             np.array([v_x_current, v_y_current]), 
@@ -103,7 +104,12 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
 
         # Get new position
         # y, x = distance.distance((lon_0, lat_0), (latitude, longitude)).km
+        # print(dx, dy)
+        old_lon = longitude
+        old_lat = latitude
         longitude, latitude = lon_lat_from_displacement(dx, dy, longitude, latitude)
+
+        print(abs(old_lon-longitude), abs(old_lat-latitude))
         # x += dx #+ noise_x
         # y += dy #+ noise_y
 
@@ -292,78 +298,89 @@ def save_to_GeoJSON(data, filename):
 
 #     return x
 
-# def load_current_data(year: int):
+def preprocess_mat(x):
+    return np.flip(np.moveaxis(x, -1, 0), axis=1)
 
-#     # currents
-#     iCa_cU_D_1 = loadmat('iCa_cU_D_' + str(year))['iCa_cU_D_' + str(year)]
-#     iCa_cU_D_2 = loadmat('iCa_cU_D_' + str(year + 1))['iCa_cU_D_' + str(year + 1)]
 
-#     iCa_cV_D_1 = loadmat('iCa_cV_D_' + str(year))['iCa_cV_D_' + str(year)]
-#     iCa_cV_D_2 = loadmat('iCa_cV_D_' + str(year + 1))['iCa_cV_D_' + str(year + 1)]
+def load_current_data(year: int):
 
-#     # the line below joins two years
-#     U2y = np.concatenate((iCa_cU_D_1, iCa_cU_D_2), axis=2)
-#     V2y = np.concatenate((iCa_cV_D_1, iCa_cV_D_2), axis=2)
+    # currents
+    iCa_cU_D_1 = loadmat('iCa_cU_D_' + str(year))['iCa_cU_D_' + str(year)]
+    iCa_cU_D_2 = loadmat('iCa_cU_D_' + str(year + 1))['iCa_cU_D_' + str(year + 1)]
 
-#     U2y = np.transpose(U2y, axes=(1,0,2))
-#     V2y = np.transpose(V2y, axes=(1,0,2))
+    iCa_cV_D_1 = loadmat('iCa_cV_D_' + str(year))['iCa_cV_D_' + str(year)]
+    iCa_cV_D_2 = loadmat('iCa_cV_D_' + str(year + 1))['iCa_cV_D_' + str(year + 1)]
 
-#     return U2y, V2y
+    # the line below joins two years
+    U2y = np.concatenate((iCa_cU_D_1, iCa_cU_D_2), axis=2)
+    V2y = np.concatenate((iCa_cV_D_1, iCa_cV_D_2), axis=2)
 
-# def load_wind_data(year: int):
+    # U2y = np.transpose(U2y, axes=(1,0,2))
+    # V2y = np.transpose(V2y, axes=(1,0,2))
 
-#     # winds
-#     iCa_wU_D_1 = loadmat('iCa_wU_D_' + str(year))['iCa_wU_D_' + str(year)]
-#     iCa_wU_D_2 = loadmat('iCa_wU_D_' + str(year + 1))['iCa_wU_D_' + str(year + 1)]
+    U2y = preprocess_mat(U2y)
+    V2y = preprocess_mat(V2y)
 
-#     iCa_wV_D_1 = loadmat('iCa_wV_D_' + str(year))['iCa_wV_D_' + str(year)]
-#     iCa_wV_D_2 = loadmat('iCa_wV_D_' + str(year + 1))['iCa_wV_D_' + str(year + 1)]
+    return U2y, V2y
 
-#     # the line below joins two years
-#     wU2y = np.concatenate((iCa_wU_D_1, iCa_wU_D_2), axis=2)
-#     wV2y = np.concatenate((iCa_wV_D_1, iCa_wV_D_2), axis=2)
+def load_wind_data(year: int):
 
-#     wU2y = np.transpose(wU2y, axes=(1,0,2))
-#     wV2y = np.transpose(wV2y, axes=(1,0,2))
+    # winds
+    iCa_wU_D_1 = loadmat('iCa_wU_D_' + str(year))['iCa_wU_D_' + str(year)]
+    iCa_wU_D_2 = loadmat('iCa_wU_D_' + str(year + 1))['iCa_wU_D_' + str(year + 1)]
 
-#     return wU2y, wV2y
+    iCa_wV_D_1 = loadmat('iCa_wV_D_' + str(year))['iCa_wV_D_' + str(year)]
+    iCa_wV_D_2 = loadmat('iCa_wV_D_' + str(year + 1))['iCa_wV_D_' + str(year + 1)]
 
-def USCG_drift(Ws_ms, Cs_ms, Dt, craft):
+    # the line below joins two years
+    wU2y = np.concatenate((iCa_wU_D_1, iCa_wU_D_2), axis=2)
+    wV2y = np.concatenate((iCa_wV_D_1, iCa_wV_D_2), axis=2)
 
-    if craft == 1:
+    # wU2y = np.transpose(wU2y, axes=(1,0,2))
+    # wV2y = np.transpose(wV2y, axes=(1,0,2))
+
+    wU2y = preprocess_mat(wU2y)
+    wV2y = preprocess_mat(wV2y)
+
+    return wU2y, wV2y
+
+def USCG_drift(Ws_ms, Cs_ms, Dt, Crft):
+    ############ Choice of craft ###################
+
+    if Crft == 1:
         # sampan
         Sl = 0.04
         Yt = 0.00
         Da = 48
-    elif craft == 2:
+    elif Crft == 2:
         # skiff
         Sl = 0.03
         Yt = 0.08
         Da = 15
-    elif craft == 3:
+    elif Crft == 3:
         # sailboat
         Sl = 0.03
         Yt = 0.00
         Da = 48
-    elif craft == 4:
+    elif Crft == 4:
         # sail raft
         Sl = 0.08
         Yt = -0.17
         Da = 33
-    elif craft == 5:
+    elif Crft == 5:
         # no sail raft
         Sl = 0.015
         Yt = 0.17
         Da = 17
-    elif craft == 6:
+    elif Crft == 6:
         # sea kayak
         Sl = 0.011
         Yt = 0.24
         Da = 15
     else:
-        raise ValueError('Unknown craft type: %s' % (craft))
+        raise RuntimeError('Unknown craft type')
 
-        ##### Convertions 1 ####################
+    ##### Convertions 1 ####################
     ####  knots=m/s*1.94
 
     Ws_k = Ws_ms * 1.94  # Ws_ms to knots
@@ -376,7 +393,7 @@ def USCG_drift(Ws_ms, Cs_ms, Dt, craft):
     Ls_k = np.zeros((2,))
     Ld = np.zeros((2,))
     T_drft = np.zeros((2,))
-    if craft != 7:
+    if Crft != 7:
 
         Da_rad = (2 * np.pi * Da) / 360  # Da to radians
 
@@ -422,7 +439,7 @@ def USCG_drift(Ws_ms, Cs_ms, Dt, craft):
         T_drft[1] = (Dy_Uw + Dy_Vw + Dy_Vc) / 1e+3  # merid.
 
     ########### total leeway for the Levison method.
-    if craft == 7:
+    if Crft == 7:
 
         aWs_k = abs(Ws_k)
         sz = np.sign(Ws_k[0])
