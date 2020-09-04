@@ -109,7 +109,7 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
         old_lat = latitude
         longitude, latitude = lon_lat_from_displacement(dx, dy, longitude, latitude)
 
-        print(abs(old_lon-longitude), abs(old_lat-latitude))
+        # print(abs(old_lon-longitude), abs(old_lat-latitude))
         # x += dx #+ noise_x
         # y += dy #+ noise_y
 
