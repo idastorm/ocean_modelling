@@ -79,8 +79,8 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
         # v_x_current = current_in_x((day+t, longitude, latitude))
         # v_y_current = current_in_y((day+t, longitude, latitude))
     
-        v_x_current = current_in_x((latitude, longitude))
-        v_y_current = current_in_y((latitude, longitude))
+        v_x_current = current_in_x((longitude, latitude))
+        v_y_current = current_in_y((longitude, latitude))
 
         # Test if we have reached land
         if np.isnan(v_x_current) or np.isnan(v_y_current):
@@ -90,8 +90,8 @@ def simulate_vessel_trajectory(vessel, day, timesteps, dt, lon_0, lat_0, current
         # v_x_wind = wind_in_x((day+t, longitude, latitude))
         # v_y_wind = wind_in_y((day+t, longitude, latitude))                
 
-        v_x_wind = wind_in_x((latitude, longitude))
-        v_y_wind = wind_in_y((latitude, longitude))  
+        v_x_wind = wind_in_x((longitude, latitude))
+        v_y_wind = wind_in_y((longitude, latitude))  
         
         # print(v_x_current, v_y_current)
         # print(v_x_wind, v_y_wind)
@@ -123,8 +123,8 @@ def lon_lat_from_displacement(dx, dy, longitude, latitude):
 
     r_earth = 6371 # km
 
-    new_latitude  = latitude  + (dy / r_earth) * (180 / np.pi);
-    new_longitude = longitude + (dx / r_earth) * (180 / np.pi) / np.cos(latitude * np.pi/180);
+    new_latitude  = latitude  + (dy / r_earth) * (180 / np.pi)
+    new_longitude = longitude + (dx / r_earth) * (180 / np.pi) / np.cos(latitude * np.pi/180)
 
     #print(new_longitude, new_latitude)
 
@@ -175,10 +175,10 @@ def get_departure_points(mask, longitude, latitude, offset=-1):
 
     mask[:,-1] = np.nan
 
-    lon_coords = np.argmax(mask, axis=1) 
+    lon_coords = np.argmax(mask, axis=0) 
 
     lon_points = longitude[lon_coords]+offset
-    lat_points = latitude
+    lat_points = latitude[::-1]
 
     return np.vstack((lon_points, lat_points)).T
 
@@ -299,7 +299,7 @@ def save_to_GeoJSON(data, filename):
 #     return x
 
 def preprocess_mat(x):
-    return np.flip(np.moveaxis(x, -1, 0), axis=1)
+    return np.moveaxis(x, [0, 1, 2], [2, 1, 0])
 
 
 def load_current_data(year: int):
