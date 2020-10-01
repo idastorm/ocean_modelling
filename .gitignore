@@ -1,0 +1,14 @@
+.ipynb_checkpoints
+.vscode
+__pycache__
+
+matlab
+data
+
+*.jpg
+*.png
+
+test.*
+
+*.txt
+
