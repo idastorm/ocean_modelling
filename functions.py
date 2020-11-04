@@ -1,13 +1,14 @@
 #import functions and modules:
 from ipywidgets import Dropdown, ColorPicker, VBox, HBox, Output, Button, Checkbox, Tab, Label
-from ipywidgets import interact, interact_manual, Dropdown, SelectMultiple, HBox, VBox, Button, Output, FloatText, IntText, IntRangeSlider, RadioButtons,IntProgress, Checkbox, GridspecLayout
+from ipywidgets import interact, interact_manual, Dropdown, SelectMultiple, HBox, VBox, Button, Output, FloatText, IntText, IntRangeSlider, RadioButtons,IntProgress, Checkbox, GridspecLayout, Text
 from IPython.display import clear_output
 from IPython.core.display import display, HTML
-from numpy.core.numeric import full 
-# import datetime as dt
+import matplotlib.pyplot as plt
+from matplotlib.colors import rgb2hex
+
 import pandas as pd
 import numpy as np
-
+import traceback
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -92,6 +93,7 @@ class MapWidget:
                          ('Sea kayak', 6)]
 
         self.bbox = None
+        self.target = None
         self.markers = []
         self.targets = []
 
@@ -143,15 +145,21 @@ class MapWidget:
                                                  disabled=False),
 
                     "vessel type": Dropdown(options = vessels_tuple,
+                                            style=style_bin,
                                             value = 1,
                                             rows = 4,
-                                            description = 'Vessel type',
+                                            description = 'Vessel type:',
                                             disabled = False),
+                    
+                    "data": Text(value='/home/vws/projects/voyager/data',
+                                style= style_bin,
+                                description='Data directory:',
+                                disabled=True),
 
                     "update": Button(description='Run simulation',
                                      disabled=False,
                                      button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                                     tooltip='Simulates trajectories in map selection',)
+                                     tooltip='Simulates trajectories in map selection',),
         }
 
 
@@ -261,6 +269,10 @@ class MapWidget:
 
     def draw_callback(self, this, action, geo_json):
 
+        # print(geo_json)
+        # print(self.markers)
+        # print(geo_json["properties"]["style"].keys())
+
         if geo_json["geometry"]["type"] == "Polygon":
 
             if action == "created":
@@ -274,7 +286,7 @@ class MapWidget:
 
                 self.bbox = None
         
-        elif geo_json["geometry"]["type"] == "Point":
+        elif (geo_json["geometry"]["type"] == "Point") and ("shapeOptions" in geo_json["properties"]["style"].keys()):
 
             coords = geo_json["geometry"]["coordinates"]
 
@@ -288,6 +300,25 @@ class MapWidget:
 
             else:
                 pass
+
+        elif (geo_json["geometry"]["type"] == "Point") and not ("shapeOptions" in geo_json["properties"]["style"].keys()):
+
+            coords = geo_json["geometry"]["coordinates"]
+
+            if action == "created":
+
+                self.target = coords
+
+            elif action == "deleted":
+
+                self.target = None
+
+            else:
+                pass
+
+        else:
+            pass
+
 
     def marker_draw_callback(self, this, action, geo_json):
 
@@ -311,7 +342,7 @@ class MapWidget:
     def draw(self):
 
         # Create a map
-        m = create_map()
+        self.m = create_map()
 
         # Add some draw controls and get the values
         draw_control = DrawControl( polyline={}, polygon={})
@@ -324,6 +355,9 @@ class MapWidget:
                 "radius": 1
             }
         }
+
+        draw_control.marker = {'draggable': True}
+
         draw_control.rectangle = {
             "shapeOptions": {
                 "color": "#fca45d",
@@ -334,7 +368,7 @@ class MapWidget:
         # The draw callback sets
         # the bbox and markers properties
         draw_control.on_draw(self.draw_callback)
-        m.add_control(draw_control)
+        self.m.add_control(draw_control)
 
         header_map = Output()
         header_date = Output()
@@ -371,7 +405,8 @@ class MapWidget:
         
         ########## VESSELS ############
         vessel_box = VBox([space_vessel_settings, self.fields["vessel type"]])
-        vessel_settings_box = VBox([self.fields["displacement"], self.fields["vessel type"]])
+        data_box = VBox([space_vessel_settings, self.fields["data"]])
+        vessel_settings_box = VBox([self.fields["displacement"], self.fields["vessel type"], self.fields["data"]])
 
         self.fields["vessel type"].layout.margin = '36px 0px 0px 0px'
         self.fields["displacement"].layout.margin = '15px 0px 0px 0px' #top, right, bottom, left
@@ -382,35 +417,62 @@ class MapWidget:
         update_button.style.button_color= '#4169E1'
 
         def on_button_click(button):
-            
+
             try:
-                Simulation(model=self.fields["displacement"].value.lower(),
+                print("Loading data for region...")
+                sim = Simulation(model=self.fields["displacement"].value.lower(),
                                                 craft=self.fields["vessel type"].value,
                                                 duration=self.fields["journey length"].value,
                                                 timestep=self.fields["timestep"].value * 60 * 60,
-                                                target_point=None,
+                                                target_point=self.target,
                                                 start_date=f'{self.fields["start year"].value}-{self.fields["start month"].value}-{self.fields["start day"].value}',
                                                 end_date=f'{self.fields["end year"].value}-{self.fields["end month"].value}-{self.fields["end day"].value}',
                                                 launch_freq=self.fields["launch interval"].value,
                                                 bbox=self.bbox,
                                                 departure_points=self.markers,
-                                                data_directory='/home/vws/projects/voyager/data',
-                                                ).run('results.geojson')
+                                                data_directory=self.fields["data"].value,
+                                                )
+                print("- Data loaded!")
+                print("Starting simulation...")
+                sim.run('results.geojson')
+                print("- Simulation finished!")
 
                 with open('results.geojson', 'r') as f:
                     data = json.load(f)
 
-                if len(m.layers) > 1:
-                    m.remove_layer(m.layers[1])
+                if len(self.m.layers) > 1:
+                    self.m.remove_layer(self.m.layers[1])
+                    
+                def style_callback(feature):
 
-                data_layer = GeoJSON(data=data, name='Trajectories',style={
-                        'opacity': 0.2, 'Line': '9', 'fillOpacity': 0.1, 'weight': 2, 'color': 'red'},
-                        hover_style={'color': 'yellow', 'opacity': 1})
+                    cmap = plt.get_cmap('hot')
+                    launch_date = pd.Timestamp(feature["properties"]['date']).month/12
+                    color = cmap(launch_date)
 
-                m.add_layer(data_layer)
+                    
+
+                    return {'color': rgb2hex(color), 'opacity': 0.5, 'weight': 2}
+
+                # for trajectory in data["features"]:
+                    
+
+                #     for month_id in range(1, 13):
+                    
+                data_layer = GeoJSON(data=trajectory, 
+                                     name=pd.Timestamp(trajectory["properties"]["date"]),
+                                        #  style={'Line': '9'},s
+                                        hover_style={'color': 'yellow', 'opacity': 1}, 
+                                        style_callback=style_callback
+                                        )
+
+
+
+                self.m.add_layer(data_layer)
 
             except Exception as exc:
                 print(exc)
+
+                print(traceback.format_exc())
 
         # This callback runs the simulation
         update_button.on_click(on_button_click)
@@ -419,7 +481,7 @@ class MapWidget:
 
         ######### Assemble ############
         form = VBox([header_map, 
-                    m, 
+                    self.m, 
                     header_date,
                     date_box,
                     header_simulation_settings,
