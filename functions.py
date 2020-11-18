@@ -151,10 +151,10 @@ class MapWidget:
                                             description = 'Vessel type:',
                                             disabled = False),
                     
-                    "data": Text(value='/home/vws/projects/voyager/data',
+                    "data": Text(value='.',
                                 style= style_bin,
                                 description='Data directory:',
-                                disabled=True),
+                                disabled=False),
 
                     "update": Button(description='Run simulation',
                                      disabled=False,
