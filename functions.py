@@ -6,6 +6,7 @@ from IPython.core.display import display, HTML
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb2hex
 
+import calendar
 import pandas as pd
 import numpy as np
 import traceback
@@ -495,7 +496,7 @@ class MapWidget:
                 for month_id in range(1, 13):
 
                     data_layer = GeoJSON(data=trajectory_dict[month_id], 
-                                         name = str(month_id),
+                                         name = calendar.month_abbr[month_id],
                                          hover_style={'color': 'yellow', 'opacity': 1}, 
                                          style_callback=style_callback)
                     
