@@ -508,7 +508,7 @@ class MapWidget:
                 # self.m.add_layer(data_layer)
             except ValueError as exc:
 
-                print(exc)
+                print(exc.encode('unicode-escape'))
 
             except Exception as exc:
 
