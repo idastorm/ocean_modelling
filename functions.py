@@ -477,6 +477,7 @@ class MapWidget:
                                          style_callback=style_callback)
                     
                     self.m.add_layer(data_layer)
+                    self.layers.append(data_layer)
                     
                 # data_layer = GeoJSON(data=data, 
                 #                         # name=pd.Timestamp(trajectory["properties"]["date"],
