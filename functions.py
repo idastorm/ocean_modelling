@@ -422,20 +422,20 @@ class MapWidget:
             try:
 
                 if not self.bbox:
-                    raise ValueError(u"\U+274C Error: You must specify a region.".encode('unicode-escape'))
+                    raise ValueError(u"\U0000274C Error: You must specify a region.".encode('unicode-escape'))
 
                 elif not self.markers:
-                    raise ValueError(u"\U+274C Error: You must specify at least one departure point.".encode('unicode-escape'))
+                    raise ValueError(u"\U0000274C Error: You must specify at least one departure point.".encode('unicode-escape'))
 
                 elif (self.fields["displacement"].value.lower() == 'sailing' \
                     or self.fields["displacement"].value.lower() == 'paddling') \
                     and (not self.target):
 
-                    raise ValueError(u"\U+274C Error: When sailing or paddling, you must specify a target.".encode('unicode-escape'))
+                    raise ValueError(u"\U0000274C Error: When sailing or paddling, you must specify a target.".encode('unicode-escape'))
 
 
                 # All exceptions passed...
-                print(u"\U+2705 Loading data for region...".encode('unicode-escape'))
+                print(u"\U00002705 Loading data for region...".encode('unicode-escape'))
 
                 sim = Simulation(model=self.fields["displacement"].value.lower(),
                                                 craft=self.fields["vessel type"].value,
