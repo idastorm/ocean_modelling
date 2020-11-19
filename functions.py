@@ -421,6 +421,20 @@ class MapWidget:
 
             try:
                 print("Loading data for region...")
+
+                if not self.bbox:
+                    raise ValueError("You must specify a region.")
+
+                elif not self.markers:
+                    raise ValueError("You must specify at least one departure point.")
+
+                elif (self.fields["displacement"].value.lower() == 'sailing' \
+                    or self.fields["displacement"].value.lower() == 'paddling') \
+                    and (not self.target):
+
+                    raise ValueError("When sailing or paddling, you must specify a target.")
+
+
                 sim = Simulation(model=self.fields["displacement"].value.lower(),
                                                 craft=self.fields["vessel type"].value,
                                                 duration=self.fields["journey length"].value,
