@@ -151,7 +151,7 @@ class MapWidget:
                                             description = 'Vessel type:',
                                             disabled = False),
                     
-                    "data": Text(value='.',
+                    "data": Text(value='/data/cdhdata/voyager/',
                                 style= style_bin,
                                 description='Data directory:',
                                 disabled=False),
@@ -453,24 +453,42 @@ class MapWidget:
 
                     return {'color': rgb2hex(color), 'opacity': 0.5, 'weight': 2}
 
+                trajectory_dict = {k: {"type": "FeatureCollection",
+                                       "features": []} for k in range(1, 13)}
+
+                for trajectory in data["features"]:
+
+                    trajectory_month = pd.Timestamp(trajectory['properties']['data']).month
+                    trajectory_dict[trajectory_month]["features"].append(trajectory)
+
                 # for trajectory in data["features"]:
                     
 
-                #     for month_id in range(1, 13):
-                    
-                data_layer = GeoJSON(data=data, 
+                for month_id in range(1, 13):
+
+                    data_layer = GeoJSON(data=trajectory_dict[month_id], 
                                         # name=pd.Timestamp(trajectory["properties"]["date"],
-                                    name = "trajectories",
+                                    name = month_id,
                                             #  style={'Line': '9'},s
                                     hover_style={'color': 'yellow', 'opacity': 1}, 
                                     style_callback=style_callback
                                     )
+                     self.m.add_layer(data_layer)
+                    
+                # data_layer = GeoJSON(data=data, 
+                #                         # name=pd.Timestamp(trajectory["properties"]["date"],
+                #                     name = "trajectories",
+                #                             #  style={'Line': '9'},s
+                #                     hover_style={'color': 'yellow', 'opacity': 1}, 
+                #                     style_callback=style_callback
+                #                     )
 
 
 
-                self.m.add_layer(data_layer)
+                # self.m.add_layer(data_layer)
 
             except Exception as exc:
+
                 print(exc)
 
                 print(traceback.format_exc())
