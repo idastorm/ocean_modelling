@@ -154,6 +154,7 @@ class MapWidget:
                     "displacement": RadioButtons(options=['Drift',
                                                           'Paddling', 
                                                           'Sailing'],
+                                                 style=style_bin,
                                                  value='Drift',
                                                  description='Type of propulsion',
                                                  disabled=False),
