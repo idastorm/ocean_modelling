@@ -466,7 +466,7 @@ class MapWidget:
 
                 # Remove previous layers from map, except for map background
                 for idx in range(len(self.layers)):
-                    self.m.remove_layer(self.layers.pop(idx + 1))
+                    self.m.remove_layer(self.layers.pop(idx))
                     
 
                 for month_id in range(1, 13):
