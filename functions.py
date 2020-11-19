@@ -459,7 +459,7 @@ class MapWidget:
 
                 for trajectory in data["features"]:
                     
-                    trajectory_month = pd.Timestamp(trajectory['properties']['data']).month
+                    trajectory_month = pd.Timestamp(trajectory['properties']['date']).month
                     trajectory_dict[trajectory_month]["features"].append(trajectory)
 
                 # for trajectory in data["features"]:
