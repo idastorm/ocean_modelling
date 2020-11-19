@@ -94,6 +94,7 @@ class MapWidget:
 
         self.bbox = None
         self.target = None
+        self.layers  = []
         self.markers = []
         self.targets = []
 
@@ -462,7 +463,10 @@ class MapWidget:
                     trajectory_month = pd.Timestamp(trajectory['properties']['date']).month
                     trajectory_dict[trajectory_month]["features"].append(trajectory)
 
-                # for trajectory in data["features"]:
+
+                # Remove previous layers from map, except for map background
+                for idx in range(self.layers):
+                    self.m.remove_layer(self.layers.pop(idx + 1))
                     
 
                 for month_id in range(1, 13):
