@@ -155,7 +155,7 @@ class MapWidget:
                                                           'Paddling', 
                                                           'Sailing'],
                                                  value='Drift',
-                                                 description=' ',
+                                                 description='Type of propulsion',
                                                  disabled=False),
 
                     "vessel type": Dropdown(options = vessels_tuple,
@@ -168,7 +168,7 @@ class MapWidget:
                     "speed": FloatText(value=0,
                                        style=style_bin,
                                        description='Paddling speed (m/s):',
-                                       disabled=False),
+                                       disabled=True),
                     
                     "data": Text(value=default_dir,
                                 style= style_bin,
@@ -272,6 +272,14 @@ class MapWidget:
             self.fields["end day"].options = end_days[end_days > selected_day].tolist()
 
     def displacement_change(self, action):
+
+        if self.fields["displacement"].value != 'Paddling':
+
+            self.fields["speed"].disabled = True
+        
+        else:
+
+            self.fields["speed"].disabled = False
 
         if self.fields["displacement"].value == 'Paddling' or self.fields["displacement"].value == 'Sailing':
 
@@ -427,7 +435,7 @@ class MapWidget:
         # vessel_box = VBox([space_vessel_settings, self.fields["vessel type"]])
         # data_box = VBox([space_vessel_settings, self.fields["data"]])
         # results_box = VBox([space_vessel_settings, self.fields["results"]])
-        displacement_box = HBox([self.fields["displacement"], self.fields["speed"]])
+        displacement_box = VBox([self.fields["displacement"], self.fields["speed"]])
 
         vessel_settings_box = VBox([
                                     self.fields["vessel type"], 
