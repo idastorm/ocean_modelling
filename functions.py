@@ -459,7 +459,7 @@ class MapWidget:
                 #     for month_id in range(1, 13):
                     
                     data_layer = GeoJSON(data=trajectory, 
-                                        name=pd.Timestamp(trajectory["properties"]["date"]),
+                                        name=trajectory["properties"]["date"],
                                             #  style={'Line': '9'},s
                                             hover_style={'color': 'yellow', 'opacity': 1}, 
                                             style_callback=style_callback
