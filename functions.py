@@ -169,6 +169,11 @@ class MapWidget:
                                 description='Data directory:',
                                 disabled=False),
 
+                    "results": Text(value="results.geojson",
+                                style= style_bin,
+                                description='Save data to:',
+                                disabled=False),
+
                     "update": Button(description='Run simulation',
                                      disabled=False,
                                      button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
@@ -413,9 +418,13 @@ class MapWidget:
         journey_box = HBox([self.fields["launch interval"], self.fields["journey length"], self.fields["timestep"]])
         
         ########## VESSELS ############
-        vessel_box = VBox([space_vessel_settings, self.fields["vessel type"]])
-        data_box = VBox([space_vessel_settings, self.fields["data"]])
-        vessel_settings_box = VBox([self.fields["displacement"], self.fields["vessel type"], self.fields["data"]])
+        # vessel_box = VBox([space_vessel_settings, self.fields["vessel type"]])
+        # data_box = VBox([space_vessel_settings, self.fields["data"]])
+        # results_box = VBox([space_vessel_settings, self.fields["results"]])
+        vessel_settings_box = VBox([self.fields["displacement"], 
+                                    self.fields["vessel type"], 
+                                    self.fields["data"], 
+                                    self.fields["results"]])
 
         self.fields["vessel type"].layout.margin = '36px 0px 0px 0px'
         self.fields["displacement"].layout.margin = '15px 0px 0px 0px' #top, right, bottom, left
@@ -459,10 +468,10 @@ class MapWidget:
                                                 )
                 print("- Data loaded!")
                 print("Starting simulation...")
-                sim.run('results.geojson')
+                sim.run(self.fields["results"].value)
                 print("- Simulation finished!")
 
-                with open('results.geojson', 'r') as f:
+                with open(self.fields["results"].value, 'r') as f:
                     data = json.load(f)
 
                 if len(self.m.layers) > 1:
