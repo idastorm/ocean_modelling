@@ -20,6 +20,7 @@ from ipyleaflet import Map, SearchControl, Marker, AwesomeIcon
 # import ipywidgets
 
 import sys
+import os
 sys.path.append('../voyager')
 
 from voyager.core import Simulation
@@ -76,6 +77,14 @@ class MapWidget:
     def __init__(self) -> None:
         
         # map_for_selection = draw_studyarea(map_type='Street map')
+        default_dir = '/data/cdhdata/voyager/'
+
+        # all_years = [int(f.name) for f in os.scandir(os.path.join(default_dir, 'currents')) if f.is_dir()]
+
+
+        # start_date = pd.Timestamp(str(min(all_years))+'-01-01')
+        # end_date   = pd.Timestamp(str(max(all_years))+'-12-31')
+
         start_date = pd.Timestamp('1993-01-01')
         end_date   = pd.Timestamp('2018-12-31')
 
@@ -152,7 +161,7 @@ class MapWidget:
                                             description = 'Vessel type:',
                                             disabled = False),
                     
-                    "data": Text(value='/data/cdhdata/voyager/',
+                    "data": Text(value=default_dir,
                                 style= style_bin,
                                 description='Data directory:',
                                 disabled=False),
@@ -269,10 +278,6 @@ class MapWidget:
         self.fields["vessel type"].options = vessels_tuple
 
     def draw_callback(self, this, action, geo_json):
-
-        # print(geo_json)
-        # print(self.markers)
-        # print(geo_json["properties"]["style"].keys())
 
         if geo_json["geometry"]["type"] == "Polygon":
 
@@ -422,20 +427,20 @@ class MapWidget:
             try:
 
                 if not self.bbox:
-                    raise ValueError(u"\U0000274C Error: You must specify a region.".encode('unicode-escape'))
+                    raise ValueError("Error: You must specify a region.")
 
                 elif not self.markers:
-                    raise ValueError(u"\U0000274C Error: You must specify at least one departure point.".encode('unicode-escape'))
+                    raise ValueError("Error: You must specify at least one departure point.")
 
                 elif (self.fields["displacement"].value.lower() == 'sailing' \
                     or self.fields["displacement"].value.lower() == 'paddling') \
                     and (not self.target):
 
-                    raise ValueError(u"\U0000274C Error: When sailing or paddling, you must specify a target.".encode('unicode-escape'))
+                    raise ValueError("Error: When sailing or paddling, you must specify a target.")
 
 
                 # All exceptions passed...
-                print(u"\U00002705 Loading data for region...".encode('unicode-escape'))
+                print("Loading data for region...")
 
                 sim = Simulation(model=self.fields["displacement"].value.lower(),
                                                 craft=self.fields["vessel type"].value,
@@ -508,7 +513,7 @@ class MapWidget:
                 # self.m.add_layer(data_layer)
             except ValueError as exc:
 
-                print(exc.encode('unicode-escape'))
+                print(exc)
 
             except Exception as exc:
 
