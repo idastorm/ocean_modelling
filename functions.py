@@ -149,7 +149,9 @@ class MapWidget:
                                               description='Timestep (hours):',
                                               disabled=False),
                                            
-                    "displacement": RadioButtons(options=['Drift','Paddling', 'Sailing'],
+                    "displacement": RadioButtons(options=['Drift',
+                                                        #   'Paddling', 
+                                                          'Sailing'],
                                                  value='Drift',
                                                  description=' ',
                                                  disabled=False),
