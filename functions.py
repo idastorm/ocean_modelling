@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 
 #for drawing the study area:
 import json
-from ipyleaflet import Map, basemaps, basemap_to_tiles, DrawControl, GeoJSON, LayersControl,SplitMapControl, FullScreenControl
+from ipyleaflet import Map, TileLayer, basemaps, basemap_to_tiles, DrawControl, GeoJSON, LayersControl,SplitMapControl, FullScreenControl
 #draw study area - search
 from ipyleaflet import Map, SearchControl, Marker, AwesomeIcon
 # import ipywidgets
@@ -465,8 +465,8 @@ class MapWidget:
 
 
                 # Remove previous layers from map, except for map background
-                for idx in range(len(self.layers)):
-                    self.m.remove_layer(self.layers.pop(idx))
+                for layer in self.m.layers:
+                    self.m.remove_layer(layer) if not isinstance(layer, TileLayer) else None
                     
 
                 for month_id in range(1, 13):
