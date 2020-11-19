@@ -476,7 +476,7 @@ class MapWidget:
                                                 duration=self.fields["journey length"].value,
                                                 timestep=self.fields["timestep"].value * 60 * 60,
                                                 target_point=self.target,
-                                                paddle_speed=self.fields["speed"].value,
+                                                speed=self.fields["speed"].value,
                                                 start_date=f'{self.fields["start year"].value}-{self.fields["start month"].value}-{self.fields["start day"].value}',
                                                 end_date=f'{self.fields["end year"].value}-{self.fields["end month"].value}-{self.fields["end day"].value}',
                                                 launch_freq=self.fields["launch interval"].value,
