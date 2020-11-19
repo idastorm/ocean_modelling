@@ -458,7 +458,7 @@ class MapWidget:
 
                 #     for month_id in range(1, 13):
                     
-                data_layer = GeoJSON(data=data["features"], 
+                data_layer = GeoJSON(data=data, 
                                         # name=pd.Timestamp(trajectory["properties"]["date"],
                                     name = "trajectories",
                                             #  style={'Line': '9'},s
