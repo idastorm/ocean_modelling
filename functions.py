@@ -282,7 +282,7 @@ class MapWidget:
 
             self.fields["speed"].disabled = False
 
-        if self.fields["displacement"].value == 'Paddling' or self.fields["displacement"].value == 'Sailing':
+        if self.fields["displacement"].value == 'Sailing':
 
             vessels_tuple = [('Log boat',1),
                             ('Plank built boat',2),
