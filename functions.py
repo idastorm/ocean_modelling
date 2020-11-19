@@ -104,6 +104,7 @@ class MapWidget:
 
         self.bbox = None
         self.target = None
+        self.paddle_speed = None
         self.layers  = []
         self.markers = []
         self.targets = []
@@ -151,7 +152,7 @@ class MapWidget:
                                               disabled=False),
                                            
                     "displacement": RadioButtons(options=['Drift',
-                                                        #   'Paddling', 
+                                                          'Paddling', 
                                                           'Sailing'],
                                                  value='Drift',
                                                  description=' ',
@@ -163,6 +164,11 @@ class MapWidget:
                                             rows = 4,
                                             description = 'Vessel type:',
                                             disabled = False),
+
+                    "speed": FloatText(value=0,
+                                       style=style_bin,
+                                       description='Paddling speed (m/s):',
+                                       disabled=False),
                     
                     "data": Text(value=default_dir,
                                 style= style_bin,
@@ -421,7 +427,9 @@ class MapWidget:
         # vessel_box = VBox([space_vessel_settings, self.fields["vessel type"]])
         # data_box = VBox([space_vessel_settings, self.fields["data"]])
         # results_box = VBox([space_vessel_settings, self.fields["results"]])
-        vessel_settings_box = VBox([self.fields["displacement"], 
+        displacement_box = HBox([self.fields["displacement"], self.fields["speed"]])
+
+        vessel_settings_box = VBox([
                                     self.fields["vessel type"], 
                                     self.fields["data"], 
                                     self.fields["results"]])
@@ -459,6 +467,7 @@ class MapWidget:
                                                 duration=self.fields["journey length"].value,
                                                 timestep=self.fields["timestep"].value * 60 * 60,
                                                 target_point=self.target,
+                                                paddle_speed=self.fields["speed"].value,
                                                 start_date=f'{self.fields["start year"].value}-{self.fields["start month"].value}-{self.fields["start day"].value}',
                                                 end_date=f'{self.fields["end year"].value}-{self.fields["end month"].value}-{self.fields["end day"].value}',
                                                 launch_freq=self.fields["launch interval"].value,
@@ -545,6 +554,7 @@ class MapWidget:
                     date_box,
                     header_simulation_settings,
                     journey_box,
+                    displacement_box,
                     vessel_settings_box, 
                     self.fields["update"]])
 

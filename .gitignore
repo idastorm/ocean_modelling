@@ -12,3 +12,10 @@ test.*
 
 *.txt
 
+GeoJSON
+
+demo_tuesday_presentation.ipynb
+functions_tuesday_presentation.ipynb
+functions.ipynb
+
+*.geojson
