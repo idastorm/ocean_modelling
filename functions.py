@@ -468,7 +468,7 @@ class MapWidget:
                 for month_id in range(1, 13):
 
                     data_layer = GeoJSON(data=trajectory_dict[month_id], 
-                                         name = month_id,
+                                         name = str(month_id),
                                          hover_style={'color': 'yellow', 'opacity': 1}, 
                                          style_callback=style_callback)
                     
