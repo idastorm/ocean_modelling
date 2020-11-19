@@ -453,11 +453,12 @@ class MapWidget:
 
                     return {'color': rgb2hex(color), 'opacity': 0.5, 'weight': 2}
 
-                trajectory_dict = {k: {"type": "FeatureCollection",
-                                       "features": []} for k in range(1, 13)}
+
+                # Add trajectories as separate layers depending on month
+                trajectory_dict = {k: {"type": "FeatureCollection", "features": []} for k in range(1, 13)}
 
                 for trajectory in data["features"]:
-
+                    
                     trajectory_month = pd.Timestamp(trajectory['properties']['data']).month
                     trajectory_dict[trajectory_month]["features"].append(trajectory)
 
@@ -467,13 +468,11 @@ class MapWidget:
                 for month_id in range(1, 13):
 
                     data_layer = GeoJSON(data=trajectory_dict[month_id], 
-                                        # name=pd.Timestamp(trajectory["properties"]["date"],
-                                    name = month_id,
-                                            #  style={'Line': '9'},s
-                                    hover_style={'color': 'yellow', 'opacity': 1}, 
-                                    style_callback=style_callback
-                                    )
-                     self.m.add_layer(data_layer)
+                                         name = month_id,
+                                         hover_style={'color': 'yellow', 'opacity': 1}, 
+                                         style_callback=style_callback)
+                    
+                    self.m.add_layer(data_layer)
                     
                 # data_layer = GeoJSON(data=data, 
                 #                         # name=pd.Timestamp(trajectory["properties"]["date"],
