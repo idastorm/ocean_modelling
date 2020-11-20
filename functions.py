@@ -92,7 +92,7 @@ class MapWidget:
         dates   = pd.date_range(start_date, end_date)
         self.years   = dates.year.unique()
         self.months  = dates.month.unique()
-        days    = list(range(1, 31))
+        self.days    = dates.day.unique()
 
         # Vessels names
         vessels_tuple = [('Commercial Fishing Vessels',1),
@@ -112,27 +112,35 @@ class MapWidget:
         # Styles
         style_bin = {'description_width': 'initial'}
 
-        self.fields = {"start year": Dropdown(options = self.years,
+        self.fields = {"start year": Dropdown(
+                                           value=1993,
+                                           options = self.years,
                                            description = 'Start year',
                                            disabled= False),
                                            
-                    "start month": Dropdown(options = self.months,
+                    "start month": Dropdown(
+                                           value=1,
+                                           options = self.months,
                                            description = 'Start month',
                                            disabled= False),
 
-                    "start day": Dropdown(options=days,
+                    "start day": Dropdown(value=1,
+                                          options=self.days,
                                           description = 'Start day',
                                           disabled= False),
 
-                    "end year": Dropdown(options = self.years,
+                    "end year": Dropdown(value=1993,
+                                           options = self.years,
                                            description = 'End year',
                                            disabled= False),
                                            
-                    "end month": Dropdown(options = self.months,
+                    "end month": Dropdown(value=1,
+                                           options = self.months,
                                            description = 'End month',
                                            disabled= False),
 
-                    "end day": Dropdown(options = days,
+                    "end day": Dropdown(value=2,
+                                           options = self.days,
                                            description = 'End day',
                                            disabled= False),
 
@@ -141,7 +149,7 @@ class MapWidget:
                                                description='Launch interval (days):', 
                                                disabled=False),
 
-                    "journey length": IntText(value=60,
+                    "journey length": IntText(value=30,
                                               style=style_bin,
                                               description='Max journey length (days):',
                                               disabled=False),
@@ -192,51 +200,109 @@ class MapWidget:
 
     def start_year_change(self, action):
 
-        end_years = np.array(self.fields["end year"].options)
-        selected_year = self.fields["start year"].value
+        # end_years = np.array(self.fields["end year"].options)
+        selected_year  = self.fields["start year"].value
+        selected_month = self.fields["start month"].value
+        # print(self.fields["start month"], self.fields["start day"])
+        selected_day   = self.fields["start day"].value
+
+        current_end_year  = self.fields["end year"].value
+        current_end_month = self.fields["end month"].value
+        current_end_day   = self.fields["end day"].value
+
+        date = pd.Timestamp(str(selected_year)+"-"+str(selected_month)+"-"+str(selected_day))
+        current_end_date = pd.Timestamp(str(current_end_year)+"-"+str(current_end_month)+"-"+str(current_end_day))
+
+        end_date = date - pd.Timedelta(1, 'day')
+
+        end_year  = end_date.year
+        end_month = end_date.month
+        end_day   = end_date.day
+
+        n_days_in_month = pd.Timestamp(str(end_year)+"-"+str(end_month)).days_in_month
+
+        if current_end_date <= date:
+            self.fields["end year"].options = self.years[self.years >= selected_year].tolist()
+            self.fields["end month"].options = self.months[self.months >= selected_month].tolist()
+            self.fields["end day"].options = self.days[(self.days > selected_day) & (self.days <= n_days_in_month)].tolist()
+
+        elif current_end_date > date: 
+            self.fields["end year"].options = self.years[self.years >= selected_year].tolist()
+            # self.fields["end year"].value   = end_year # Does not seem to work
 
         # Update end years to only allow years above 
         # current start year value
-        self.fields["end year"].options = end_years[end_years >= selected_year].tolist()
+        # if self.fields["end year"] == self.fields["start year"]
+        # self.fields["end year"].options = end_years[end_years >= selected_year].tolist()
         
     def end_year_change(self, action):
 
-        if self.fields["end year"].value == self.fields["start year"].value:
+        start_year  = self.fields["start year"].value
+        start_month = self.fields["start month"].value
+        start_day   = self.fields["start day"].value
 
-            end_months = np.array(self.months)
-            selected_month = self.fields["start month"].value
+        current_end_year  = self.fields["end year"].value
+        current_end_month = self.fields["end month"].value
+        current_end_day   = self.fields["end day"].value
 
-            self.fields["end month"].options = end_months[end_months >= selected_month].tolist()
+        date = pd.Timestamp(str(start_year)+"-"+str(start_month)+"-"+str(start_day))
+        current_end_date = pd.Timestamp(str(current_end_year)+"-"+str(current_end_month)+"-"+str(current_end_day))
+
+        end_date = date - pd.Timedelta(1, 'day')
+
+        n_days_in_month = end_date.days_in_month
+
+        end_year  = end_date.year
+        end_month = end_date.month
+        end_day   = end_date.day
+
+        # Change 
+        if end_year == start_year:
+
+            self.fields["end month"].options = self.months[self.months >= start_month]
+        
+            # Change end day
+            self.fields["end day"].options = self.days[(self.days > start_day) & (self.days <= n_days_in_month)]
 
         else:
+            self.fields["end day"].options = self.days[(self.days <= n_days_in_month)]
 
-            self.fields["end month"].options = self.months
+        # if self.fields["end year"].value == self.fields["start year"].value:
+
+        #     end_months = np.array(self.months)
+        #     selected_month = self.fields["start month"].value
+
+        #     self.fields["end month"].options = end_months[end_months >= selected_month].tolist()
+
+        # else:
+
+        #     self.fields["end month"].options = self.months
 
     def start_month_change(self, action):
 
         same_year = self.fields["start year"].value == self.fields["end year"].value
         same_month = self.fields["start month"].value == self.fields["end month"].value
         
-        start_year = self.fields["start year"].value
-        end_year   = self.fields["end year"].value
-        month      = self.fields["start month"].value
+        start_year  = self.fields["start year"].value
+        start_month = self.fields["start month"].value
+        start_day   = self.fields["start day"].value
 
-        # Calculate the number of days in the month of that year
-        # This is important, since the data is leap year sensitive
-        self.fields["start day"].options = list(range(1, pd.Timestamp(f"{start_year}-{month}").days_in_month + 1))
+        end_year  = self.fields["end year"].value
+        end_month = self.fields["end month"].value
+        end_day   = self.fields["end day"].value
 
-        end_months = np.array(self.months)
-        selected_month = self.fields["start month"].value
+        start_date = pd.Timestamp(str(start_year)+"-"+str(start_month)+"-"+str(start_day))
+        end_date = pd.Timestamp(str(end_year)+"-"+str(end_month)+"-"+str(end_day))
 
-        self.fields["end month"].options = end_months[end_months >= selected_month].tolist()
+        # new_end_date = date - pd.Timedelta(1, 'day')
 
-        # if start_year == end_year or len(self.fields["end month"].options)==0:
+        if (start_year == end_year):
 
-        #     updated_list=[]
-        #     for item in s_month.options:
-        #         if item>=int(c['new']):
+            self.fields["end month"].options = self.months[self.months >= start_month]
 
-        #             updated_list.append(item)
+        self.fields["start day"].options = self.days[self.days <= start_date.days_in_month]
+        self.fields["end day"].options = self.days[(self.days <= start_date.days_in_month) & (self.days > start_day)]
+
 
     def end_month_change(self, action):
 
