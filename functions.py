@@ -87,7 +87,7 @@ class MapWidget:
         # end_date   = pd.Timestamp(str(max(all_years))+'-12-31')
 
         start_date = pd.Timestamp('1993-01-01')
-        end_date   = pd.Timestamp('2018-12-31')
+        end_date   = pd.Timestamp('2018-12-25')
 
         dates   = pd.date_range(start_date, end_date)
         self.years   = dates.year.unique()
