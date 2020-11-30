@@ -594,7 +594,12 @@ class MapWidget:
                                          hover_style={'color': 'yellow', 'opacity': 1}, 
                                          style_callback=style_callback)
 
-                    data_layer.popup = ipyHTML('Hello World!!')
+
+                    message2 = ipyHTML()
+                    message2.value = "Hello <b>World</b>"
+                    message2.placeholder = "Some HTML"
+                    message2.description = "Some HTML"
+                    data_layer.popup = message2
                     
                     self.m.add_layer(data_layer)
                     self.layers.append(data_layer)
