@@ -1,5 +1,6 @@
 #import functions and modules:
 from ipywidgets import Dropdown, ColorPicker, VBox, HBox, Output, Button, Checkbox, Tab, Label
+from ipywidgets import HTML as ipyHTML
 from ipywidgets import interact, interact_manual, Dropdown, SelectMultiple, HBox, VBox, Button, Output, FloatText, IntText, IntRangeSlider, RadioButtons,IntProgress, Checkbox, GridspecLayout, Text
 from IPython.display import clear_output
 from IPython.core.display import display, HTML
@@ -593,7 +594,7 @@ class MapWidget:
                                          hover_style={'color': 'yellow', 'opacity': 1}, 
                                          style_callback=style_callback)
 
-                    data_layer.popup = HTML('Hello World!!')
+                    data_layer.popup = ipyHTML('Hello World!!')
                     
                     self.m.add_layer(data_layer)
                     self.layers.append(data_layer)
