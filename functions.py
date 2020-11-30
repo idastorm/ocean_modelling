@@ -592,6 +592,8 @@ class MapWidget:
                                          name = calendar.month_abbr[month_id],
                                          hover_style={'color': 'yellow', 'opacity': 1}, 
                                          style_callback=style_callback)
+
+                    data_layer.popup = HTML('Hello World!!')
                     
                     self.m.add_layer(data_layer)
                     self.layers.append(data_layer)
