@@ -156,12 +156,12 @@ class MapWidget:
                                                description='Launch interval (days):', 
                                                disabled=False),
 
-                    "journey length": IntText(value=30,
+                    "journey length": IntText(value=10,
                                               style=style_bin,
                                               description='Max journey length (days):',
                                               disabled=False),
 
-                    "timestep": IntText(value=24,
+                    "timestep": FloatText(value=8,
                                               style=style_bin,
                                               description='Timestep (hours):',
                                               disabled=False),
