@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 
 #for drawing the study area:
 import json
-from ipyleaflet import Map, TileLayer, basemaps, basemap_to_tiles, DrawControl, GeoJSON, LayersControl,SplitMapControl, FullScreenControl
+from ipyleaflet import Map, TileLayer, basemaps, basemap_to_tiles, DrawControl, GeoJSON, LayersControl,SplitMapControl, FullScreenControl, MeasureControl
 #draw study area - search
 from ipyleaflet import Map, SearchControl, Marker, AwesomeIcon
 # import ipywidgets
@@ -62,13 +62,19 @@ def create_map(map_type='Street map'):
     fullscreen_control = FullScreenControl()
     layers_control = LayersControl(position='topright')
 
-    controls = [search_control, fullscreen_control, layers_control]
+    measure_control = MeasureControl(position='bottomleft',
+                                     active_color = 'orange',
+                                     primary_length_unit = 'kilometers'
+                                    )
+
+    measure_control.completed_color = 'red'
+
+    controls = [search_control, fullscreen_control, layers_control, measure_control]
 
     # Add all control listeners to map model
     for control in controls:
         m.add_control(control)
-
-
+  
     # m.on_interaction(widget.handle_click)
 
     return m
@@ -595,11 +601,6 @@ class MapWidget:
                                          style_callback=style_callback)
 
 
-                    message2 = ipyHTML()
-                    message2.value = "Hello <b>World</b>"
-                    message2.placeholder = "Some HTML"
-                    message2.description = "Some HTML"
-                    data_layer.popup = message2
                     
                     self.m.add_layer(data_layer)
                     self.layers.append(data_layer)
